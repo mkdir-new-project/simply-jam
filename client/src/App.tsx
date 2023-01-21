@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import Message from './structures/Message/Message';
-import MessageTypes from './structures/Message/MessageType';
+import Message, { MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
 
 function App() {

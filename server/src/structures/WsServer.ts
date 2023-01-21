@@ -5,7 +5,8 @@ import WsEvent from "./Events/WsEvent";
 import Message, { MessageTypes } from "../../../shared/structures/Message";
 import User from "./Users/User";
 import Utils from "../utils/Utils";
-import Logger from "../utils/Logger";
+import Logger from "../../../shared/structures/Logger";
+
 import colors from 'colors/safe';
 
 class WsServer extends server  {

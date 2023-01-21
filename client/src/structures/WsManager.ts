@@ -1,4 +1,4 @@
-import Logger from "../utils/Logger";
+import Logger from "../../../shared/structures/Logger";
 import Message from "../../../shared/structures/Message";
 
 

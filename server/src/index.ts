@@ -1,6 +1,6 @@
 import WsServer from "./structures/WsServer";
 import { createServer } from "http";
-import Logger from "./utils/Logger";
+import Logger from "../../shared/structures/Logger";
 import colors from 'colors';
 
 declare module 'websocket' {

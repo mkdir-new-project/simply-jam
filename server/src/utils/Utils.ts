@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto"
 import { Stream } from "stream";
-import Logger from "./Logger";
+import Logger from "../../../shared/structures/Logger";
+
 
 class Utils {
 
