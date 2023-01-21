@@ -8,6 +8,7 @@ import Utils from "../utils/Utils";
 import Logger from "../../../shared/structures/Logger";
 
 import colors from 'colors/safe';
+import Room from "./Rooms/Room";
 
 class WsServer extends server  {
 
@@ -17,6 +18,7 @@ class WsServer extends server  {
     // collection of all collected users
     // map { userId: User object }
     users: Map<string, User>;
+    rooms: Map<string, Room>;
 
     constructor(httpServer: ReturnType<typeof createServer>) {
         if (!httpServer) throw new Error('No http server found');
@@ -24,6 +26,7 @@ class WsServer extends server  {
 
         this.events = new Map();
         this.users = new Map();
+        this.rooms = new Map();
     }
 
     async init() {
@@ -42,6 +45,15 @@ class WsServer extends server  {
 
         console.log([...this.events.keys()].map(x => MessageTypes[x]));
 
+    }
+
+    broadcastRoom(roomId: string, message: Message|Buffer) {
+        const room = this.rooms.get(roomId);
+
+        if (!room || room.users.size === 0) return;
+
+        for (const user of [...room.users.values()])
+            user.connection.send(message instanceof Message ? message.encode() : message);
     }
 
     start() {
@@ -108,7 +120,7 @@ class WsServer extends server  {
                 if (!wsevent) return;
 
                 // if exists, then execute the associated function written in server to handle request
-                wsevent.callback(connection, data);
+                wsevent.callback.call(this, connection, data);
 
             });
 

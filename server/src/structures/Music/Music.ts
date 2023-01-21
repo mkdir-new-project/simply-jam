@@ -14,6 +14,10 @@ class Music {
         this.startTime = Date.now();
     }
 
+    serialize() {
+        return { trackId: this.source, seek: this.startTime - Date.now() };
+    }
+
     // async getBuffer(): Buffer {
     //     try {
     //         this.buffer = await Utils.streamToBuffer(this.readableStream);

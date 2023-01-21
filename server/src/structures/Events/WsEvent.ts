@@ -2,11 +2,12 @@ import Events from "./Events";
 import EventTypes from "./EventTypes";
 import { connection } from 'websocket';
 import Message, { MessageTypes } from "../../../../shared/structures/Message";
+import WsServer from "../WsServer";
 
 
 interface Arguments {
     messageType: MessageTypes;
-    callback: (ws: connection, message: Message) => Promise<any>;
+    callback: (this: WsServer, ws: connection, message: Message) => Promise<any>;
 }
 
 class WsEvent extends Events {
