@@ -1,8 +1,8 @@
 import Events from "./Events";
 import EventTypes from "./EventTypes";
 import { connection } from 'websocket';
-import MessageTypes from "../Message/MessageType";
-import Message from "../Message/Message";
+import Message, { MessageTypes } from "../../../../shared/structures/Message";
+
 
 interface Arguments {
     messageType: MessageTypes;

@@ -1,5 +1,5 @@
 import WsEvent from "../../structures/Events/WsEvent";
-import Message from "../../structures/Message/Message";
+import Message from "../../../../shared/structures/Message";
 import Music from "../../structures/Music/Music";
 
 export default new WsEvent({

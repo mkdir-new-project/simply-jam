@@ -21,13 +21,13 @@ class Message {
         return _encode(this.deflate());
     }
 
-    static typesArray() {
-        const arr = [];
-        for (const i in MessageTypes) {
-            arr.push(MessageTypes[i]);
-        }
-        return arr;
-    }
+    // static typesArray() {
+    //     const arr = [];
+    //     for (const i in MessageTypes) {
+    //         arr.push(MessageTypes[i]);
+    //     }
+    //     return arr;
+    // }
 
     static types = MessageTypes;
 

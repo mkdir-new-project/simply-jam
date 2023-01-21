@@ -1,4 +1,4 @@
-import MessageTypes from "../Message/MessageType";
+import { MessageTypes } from "../../../../shared/structures/Message";
 import EventTypes from "./EventTypes";
 
 abstract class Events {

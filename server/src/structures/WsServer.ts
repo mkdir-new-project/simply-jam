@@ -2,8 +2,7 @@ import { server } from "websocket";
 import fs from 'fs';
 import { createServer } from 'http'
 import WsEvent from "./Events/WsEvent";
-import MessageTypes from "./Message/MessageType";
-import Message from "./Message/Message";
+import Message, { MessageTypes } from "../../../shared/structures/Message";
 import User from "./Users/User";
 import Utils from "../utils/Utils";
 import Logger from "../utils/Logger";

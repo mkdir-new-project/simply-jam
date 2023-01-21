@@ -1,5 +1,6 @@
 import Logger from "../utils/Logger";
-import Message from "./Message/Message";
+import Message from "../../../shared/structures/Message";
+
 
 class WsManager extends EventTarget {
 
