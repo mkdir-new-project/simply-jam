@@ -110,22 +110,6 @@ class WsServer extends server  {
                 // if exists, then execute the associated function written in server to handle request
                 wsevent.callback(connection, data);
 
-                // that's all in wsserver also can you see terminal open shared terminal
-                // click the liveshare icon from left menu bar
-                // then see participants, shared terminals (2)?
-                // click on powershell ya ima run see if you can see me typing
-                // sexx. i am having orgasm from reading so clean code . where do i see that?
-                // yes saw. its empty tho. ah okay, do run. yes i can see
-                // server runs, the map shown is all the registered events, currently there's only one
-                // wait, i'll log name too
-                // see now?, one event is registered "get_track". sex
-                // now click on the other powershell 
-                // the current one is for server, the other one is client
-                // ill start client now. yes
-                // go back to server terminal
-                // see it shows new user join
-                // wow
-                // now when i disconnect
             });
 
         })
