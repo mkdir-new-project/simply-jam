@@ -25,10 +25,11 @@ function App() {
 
 		wsm.addEventListener(Message.types[Message.types.GET_TRACK_SEEK], (ev: any) => {
 			console.log('ev', ev.detail);
+			const ping = (Date.now() - wsm.lt) / 1000;
+			console.log('ping', ev.detail[0].seek, ping);
 
-			console.log(ev.detail[0].seek);
 
-			audio.currentTime = ev.detail[0].seek;
+			audio.currentTime = ev.detail[0].seek + ping;
 
 
 		})
@@ -72,6 +73,7 @@ function App() {
 				audio.play();
 
 				audio.addEventListener('loadeddata', () => {
+					wsm.lt = Date.now();
 					wsm.send(new Message({
 						type: Message.types.GET_TRACK_SEEK,
 					}))

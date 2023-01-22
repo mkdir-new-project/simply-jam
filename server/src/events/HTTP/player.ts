@@ -8,7 +8,7 @@ import HttpEvent from "../../structures/Events/HttpEvent";
  */
 
 export default new HttpEvent({
-    route: '/audio',
+    route: '/player',
     async callback(req, res) {
         const url = new URL(req.url, `https://${req.headers.host}`);
         const trackId = url.searchParams.get('trackId');
@@ -34,6 +34,7 @@ export default new HttpEvent({
         let chunksize = (end - start) + 1;
 
         const headers = {
+            'cache': 'no-cache',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS, GET',
             'Access-Control-Max-Age': 2592000,
@@ -41,11 +42,11 @@ export default new HttpEvent({
             "Content-Length": chunksize,
             "Accept-Ranges": "bytes",
             "Content-Range": "bytes " + start + "-" + end + "/" + total,
-            'Content-Disposition': `attachment;\ filename="${trackId}.mp3`
 
         };
 
         res.writeHead(206, headers);
+
 
 
         track.pipe(res);

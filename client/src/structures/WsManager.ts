@@ -5,11 +5,13 @@ import Message from "../../../shared/structures/Message";
 class WsManager extends EventTarget {
 
     ws: null | WebSocket;
+    lt: number;
 
     constructor() {
         super();
 
         this.ws = null;
+        this.lt = Date.now();
     }
 
     private wsHandshake() {
