@@ -25,7 +25,7 @@ class WsManager extends EventTarget {
         this.ws = new WebSocket(`${protocol}://${hostname}`);
 
 
-
+        this.ws.binaryType = 'arraybuffer';
         this.ws.addEventListener('open', this.onOpen.bind(this));
         this.ws.addEventListener('error', this.onError.bind(this));
         this.ws.addEventListener('close', this.onClose.bind(this));
@@ -57,12 +57,16 @@ class WsManager extends EventTarget {
     }
 
     private onMessage(event: MessageEvent<any>) {
-        console.log(event.data);
         const message = Message.inflate(event.data);
 
         console.log(message);
 
         if (!message) return;
+
+        switch (message.type) {
+            case Message.types.NEW_TRACK:
+                this.dispatchEvent(new CustomEvent(Message.types[message.type], { detail: message.data }))
+        }
     }
 }
 

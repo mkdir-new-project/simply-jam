@@ -15,7 +15,7 @@ class Music {
     }
 
     serialize() {
-        return { trackId: this.source, seek: this.startTime - Date.now() };
+        return { trackId: this.source, seek: Date.now() - this.startTime };
     }
 
     // async getBuffer(): Buffer {

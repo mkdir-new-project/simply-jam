@@ -13,7 +13,8 @@ export default new WsEvent({
         if (!roomId) return;
 
         const room = this.rooms.get(roomId);
-        room.currentTrack = new Music(`https://youtube.com/watch?v=${trackId}`);
+        // room.currentTrack = new Music(`https://youtube.com/watch?v=${trackId}`);
+        room.currentTrack = new Music(trackId);
 
 
         this.broadcastRoom(roomId, new Message({

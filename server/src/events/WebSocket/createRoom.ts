@@ -15,12 +15,16 @@ export default new WsEvent({
         if (user.roomId != null) return;
 
         const newRoom = new Room();
+
+        // del later
+
+        newRoom.roomId = '123'
         
         user.roomId = newRoom.roomId;
         newRoom.users.set(user.userId, user);
         this.rooms.set(newRoom.roomId, newRoom);
 
-        Logger.log(this.rooms, this.users);
+        // Logger.log(this.rooms, this.users);
 
     },
 })

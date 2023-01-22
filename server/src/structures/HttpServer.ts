@@ -24,8 +24,6 @@ class HttpServer {
         for (let i = 0; i < httpTypeArray.length; i++)
             this.events.set(i, new Map());
 
-            console.log(httpTypeArray)
-
     }
 
     async init() {
@@ -38,8 +36,6 @@ class HttpServer {
             const event = (await import(`../events/HTTP/${eventsPath[i]}`)).default as HttpEvent;
 
             const eventType = this.events.get(event.method);
-
-            Logger.log(eventType, event.method);
 
             if (eventType.has(event.route)) continue;
 
@@ -56,12 +52,19 @@ class HttpServer {
         this.server.on('request', (req, res) => {
             const method = req.method;
             const eventType = this.events.get(httpTypeArray.indexOf(method));
-            const event = eventType.get(req.url);
+            const idx = req.url.indexOf('?');
+            const url = req.url.slice(0, idx != -1 ? idx : req.url.length)
+
+            const event = eventType.get(url);
+
+            console.log(url)
 
             if (!event)
                 res.end('Invalid route');
-            else 
+            else {
                 event.callback.call(_this, req, res);
+                Logger.log(colors.blue('[HTTP_CLIENT]'), `[${HttpTypes[event.method]}]`, `[${event.route}]`);
+            }
         })
 
         this.server.listen(this.PORT);

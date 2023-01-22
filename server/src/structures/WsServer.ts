@@ -52,8 +52,10 @@ class WsServer extends server  {
 
         if (!room || room.users.size === 0) return;
 
-        for (const user of [...room.users.values()])
-            user.connection.send(message instanceof Message ? message.encode() : message);
+        for (const user of [...room.users.values()]) {
+            const encoded = message instanceof Message ? message.encode() : message;
+            user.connection.send(encoded);
+        }
     }
 
     start() {
@@ -67,7 +69,7 @@ class WsServer extends server  {
 
             this.users.set(user.userId, user);
 
-            Logger.log(colors.blue('[SERVER]'), '[WS_CONNECTION]', '-> new user join');
+            Logger.log(colors.blue('[WS_SERVER]'), '[WS_CONNECTION]', '-> new user join');
 
             Logger.log('Current users ->', [...this.users.keys()])
             // see discord saw i have it by my side , ican see msg
@@ -79,7 +81,7 @@ class WsServer extends server  {
         this.on('close', (connection, _number, _description) => {
             this.users.delete(connection.id);
 
-            Logger.log(colors.blue('[SERVER]'), '[WS_CONNECTION_CLOSE]', '-> user left');
+            Logger.log(colors.blue('[WS_SERVER]'), '[WS_CONNECTION_CLOSE]', '-> user left');
 
             Logger.log('Current users ->', [...this.users.keys()]);
 
@@ -110,7 +112,7 @@ class WsServer extends server  {
                 // error proection
                 if (!data) return console.error('Error parsing message');
 
-                Logger.log(colors.blue('[CLIENT]'), `[${MessageTypes[data.type]}] ->`, data);
+                Logger.log(colors.blue('[WS_CLIENT]'), `[${MessageTypes[data.type]}] ->`, data);
 
                 
                 // see if the event sent from client is registered on server side
