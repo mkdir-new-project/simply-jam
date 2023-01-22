@@ -6,6 +6,7 @@ function App() {
 
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const wsm = new WsManager();
+	const audio = new Audio();
 
 	useEffect(() => {
 

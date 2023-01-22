@@ -2,6 +2,7 @@ import WsServer from "./structures/WsServer";
 import { createServer } from "http";
 import Logger from "../../shared/structures/Logger";
 import colors from 'colors';
+import HttpServer from "./structures/HttpServer";
 
 declare module 'websocket' {
     interface connection {
@@ -15,14 +16,13 @@ Logger.DEV = true;
 
 
 // create http server to handle http requests
-const httpserver = createServer((_req, res) => {
-    res.end('lmao');
-})
+const httpserver = new HttpServer(3000);
 
-httpserver.listen(3000);
+httpserver.init();
+httpserver.start();
 
 // ws server, custom build i'll show how that works now
-const server = new WsServer(httpserver);
+const server = new WsServer(httpserver.server);
 
 server.init();
 server.start();

@@ -43,7 +43,7 @@ class WsServer extends server  {
             this.events.set(event.messageType, event);
         }
 
-        console.log([...this.events.keys()].map(x => MessageTypes[x]));
+        Logger.log(colors.blue('[WS_SERVER]'), [...this.events.keys()].map(x => MessageTypes[x]));
 
     }
 
