@@ -32,11 +32,11 @@ class WsManager extends EventTarget {
         this.ws.addEventListener('message', this.onMessage.bind(this))
     }
 
-    send(data: Message|Buffer) {
+    send(data: Message | Buffer) {
         let message: Buffer;
         if (data instanceof Message) {
             message = data.encode();
-        } else 
+        } else
             message = data;
 
         this.ws?.send(message);
@@ -63,11 +63,10 @@ class WsManager extends EventTarget {
 
         if (!message) return;
 
-        switch (message.type) {
-            case Message.types.NEW_TRACK:
-                this.dispatchEvent(new CustomEvent(Message.types[message.type], { detail: message.data }))
-        }
+
+        this.dispatchEvent(new CustomEvent(Message.types[message.type], { detail: message.data }))
     }
+
 }
 
 export default WsManager;

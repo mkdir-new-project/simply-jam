@@ -15,7 +15,8 @@ class Music {
     }
 
     serialize() {
-        return { trackId: this.source, seek: Date.now() - this.startTime };
+        const millis = Date.now() - this.startTime;
+        return { trackId: this.source, seek: Math.floor(millis / 1000)};
     }
 
     // async getBuffer(): Buffer {

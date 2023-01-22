@@ -4,6 +4,7 @@ enum MessageTypes {
     CONNECT,
     PING,
     PONG,
+    GET_TRACK_SEEK,
     GET_TRACK,
     NEW_TRACK,
     SEEK_TRACK,

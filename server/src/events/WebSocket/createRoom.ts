@@ -18,7 +18,7 @@ export default new WsEvent({
 
         // del later
 
-        newRoom.roomId = '123'
+        newRoom.roomId = 'r_123'
         
         user.roomId = newRoom.roomId;
         newRoom.users.set(user.userId, user);

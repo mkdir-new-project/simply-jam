@@ -12,10 +12,18 @@ export default new WsEvent({
 
         const room = this.rooms.get(`r_${roomId}`);
 
+        console.log('join room', room)
+
         if (user.roomId != null || !room) return;
 
-        user.roomId = roomId;
+        user.roomId = room.roomId;
         room.users.set(user.userId, user);
+
+
+        connection.send(new Message({
+            type: Message.types.NEW_TRACK,
+            data: [room.currentTrack.serialize()]
+        }).encode())
 
     },
 })
