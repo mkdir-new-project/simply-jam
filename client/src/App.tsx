@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import Logger from '../../shared/structures/Logger';
 import Message, { MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
 
@@ -15,21 +16,21 @@ function App() {
 
 	useEffect(() => {
 		wsm.addEventListener(Message.types[Message.types.NEW_TRACK], (ev: any) => {
-			console.log('ev', ev.detail);
 
-			audio.src = `http://localhost:3000/audio?trackId=${ev.detail[0].trackId}`;
-			console.log(audio.src)
 			audio.crossOrigin = 'anonymous';
+			audio.src = `http://${'localhost:3000'}/audio?trackId=${ev.detail[0].trackId}`;
 
 		})
 
 		wsm.addEventListener(Message.types[Message.types.GET_TRACK_SEEK], (ev: any) => {
-			console.log('ev', ev.detail);
 			const ping = (Date.now() - wsm.lt) / 1000;
-			console.log('ping', ev.detail[0].seek, ping);
-
+			Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
+			Logger.logc('purple', 'AUDIO_SEEK', ev.detail[0].seek + ping);
 
 			audio.currentTime = ev.detail[0].seek + ping;
+
+			audio.play();
+
 
 
 		})
@@ -70,7 +71,6 @@ function App() {
 			)}>set new track</button>
 			<button onClick={() => {
 				audio.load();
-				audio.play();
 
 				audio.addEventListener('loadeddata', () => {
 					wsm.lt = Date.now();

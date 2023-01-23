@@ -22,7 +22,7 @@ class WsManager extends EventTarget {
 
     connect() {
         const protocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
-        const hostname = window.location.hostname === 'localhost' ? 'localhost:3000' : 'siteurl';
+        const hostname = window.location.hostname === 'localhost' ? 'localhost:3000' : 'simplyjam.itsananth.repl.co';
 
         this.ws = new WebSocket(`${protocol}://${hostname}`);
 
@@ -45,23 +45,22 @@ class WsManager extends EventTarget {
     }
 
     private onOpen() {
-        Logger.logc('WS_OPEN', 'blue');
+        Logger.logc('blue', 'WS_OPEN');
         this.wsHandshake();
     }
 
     private onClose() {
-        Logger.logc('WS_CLOSE', 'blue');
+        Logger.logc('blue', 'WS_CLOSE', 'websocket connection terminated');
     }
 
     private onError(e: Event) {
-        Logger.logc('WS_ERROR', 'red');
-        Logger.log(e);
+        Logger.logc('red', 'WS_ERROR', e);
     }
 
     private onMessage(event: MessageEvent<any>) {
         const message = Message.inflate(event.data);
 
-        console.log(message);
+        Logger.logc('yellow', 'WS_MESSAGE', message);
 
         if (!message) return;
 
