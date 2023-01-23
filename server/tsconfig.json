@@ -17,12 +17,12 @@
         // env
         "target": "ESNext",
         "sourceMap": false,
-        "declaration": true,
-        "declarationMap": true,
+        "declaration": false,
         "outDir": "dist",
+        "removeComments": true,
         "lib": [
             "ESNext"
-        ]
+        ],
     },
     "exclude": [
         "**/dist/"

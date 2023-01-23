@@ -27,8 +27,8 @@ class Logger {
         console.debug.apply(this, arguments as any);
     }
 
-    static logc(text: string, color: string) {
-        console.log('%c[' + `%c${text}` + '%c]', 'color: white', `color: ${color}`, 'color: white');
+    static logc(color: string, text: string, ...args: any[]) {
+        console.log('%c[' + `%c${text}` + '%c]', 'color: white', `color: ${color}`, 'color: white', ...args);
     }
 }
 
