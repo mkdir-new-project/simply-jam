@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Logger from '../../shared/structures/Logger';
 import Message, { MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
+import './global.css'
 
 declare global {
 	interface Window {
@@ -50,7 +51,9 @@ function App() {
 
 	return (
 		<>
-			<div className="App">Hello World</div>
+			<h1 className="text-3xl font-bold underline">
+				Hello world!
+			</h1>
 			<button onClick={() => wsm.ws?.close()}>disconnect</button>
 			<button onClick={() => wsm.send(
 				new Message({
