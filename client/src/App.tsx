@@ -3,6 +3,12 @@ import Logger from '../../shared/structures/Logger';
 import Message, { MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
 
+declare global {
+	interface Window {
+		frameId: number;
+	}
+}
+
 function App() {
 
 	const audioRef = useRef<HTMLAudioElement>(null);
