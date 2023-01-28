@@ -1,17 +1,26 @@
 import Logger from "../../../shared/structures/Logger";
 import Message from "../../../shared/structures/Message";
 
+const process = { env: { DEV: 'FALSE' } };
 
 class WsManager extends EventTarget {
 
     ws: null | WebSocket;
     lt: number;
+    host: string;
+    wsprotocol: string;
+    httpprotocol: string;
+
 
     constructor() {
         super();
 
         this.ws = null;
-        this.lt = Date.now();
+        this.lt = performance.now();
+        this.host = process.env.DEV === 'TRUE' ? 'localhost:3000' : 'simplyjamserver.onrender.com';//'simplyjam.itsananth.repl.co';
+        this.wsprotocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
+        this.httpprotocol = window.location.protocol === 'http:' ? 'http' : 'https';
+
     }
 
     private wsHandshake() {
@@ -21,8 +30,8 @@ class WsManager extends EventTarget {
     }
 
     connect() {
-        const protocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
-        const hostname = window.location.hostname === 'localhost' ? 'localhost:3000' : 'simplyjam.itsananth.repl.co';
+        const protocol = this.wsprotocol;
+        const hostname = this.host;
 
         this.ws = new WebSocket(`${protocol}://${hostname}`);
 
@@ -44,8 +53,12 @@ class WsManager extends EventTarget {
         this.ws?.send(message);
     }
 
+    getPing() {
+        return (Date.now() - this.lt) / 1000;
+    }
+
     private onOpen() {
-        Logger.logc('blue', 'WS_OPEN');
+        Logger.logc('blue', 'WS_OPEN', 'eslabished connection to ' + this.host);
         this.wsHandshake();
     }
 

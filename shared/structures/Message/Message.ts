@@ -3,14 +3,14 @@ import MessageTypes from './MessageType';
 
 type DeflatedMessage = [MessageTypes, ...any[]];
 
-class Message {
+class Message<dataType extends Array<any> = any[]> {
 
     type: MessageTypes;
-    data: any[];
+    data: dataType;
 
-    constructor({ type, data = [] }: { type: MessageTypes, data?: any[] }) {
+    constructor({ type, data }: { type: MessageTypes, data?: dataType }) {
         this.type = type;
-        this.data = data;
+        this.data = data ?? (new Array<any>() as dataType);
     }
 
     deflate(): DeflatedMessage {
@@ -73,3 +73,7 @@ const pong = _encode([MessageTypes.PONG]);
 export default Message;
 export { Message, ping, pong };
 export type { DeflatedMessage };
+
+
+
+

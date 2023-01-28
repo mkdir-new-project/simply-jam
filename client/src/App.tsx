@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Logger from '../../shared/structures/Logger';
 import Message, { MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 declare global {
 	interface Window {
@@ -15,8 +16,11 @@ function App() {
 	const wsm = new WsManager();
 	const audio = new Audio();
 
-	// @ts-ignore
-	window.audio = audio;
+	if (true) {
+		// @ts-ignore
+		window.audio = audio;
+		Logger.DEV = true;
+	}
 
 
 
@@ -24,12 +28,12 @@ function App() {
 		wsm.addEventListener(Message.types[Message.types.NEW_TRACK], (ev: any) => {
 
 			audio.crossOrigin = 'anonymous';
-			audio.src = `http://${'localhost:3000'}/audio?trackId=${ev.detail[0].trackId}`;
+			audio.src = `${wsm.httpprotocol}://${wsm.host}/audio?trackId=${ev.detail[0].trackId}`;
 
 		})
 
 		wsm.addEventListener(Message.types[Message.types.GET_TRACK_SEEK], (ev: any) => {
-			const ping = (Date.now() - wsm.lt) / 1000;
+			const ping = wsm.getPing();
 			Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
 			Logger.logc('purple', 'AUDIO_SEEK', ev.detail[0].seek + ping);
 
@@ -50,6 +54,12 @@ function App() {
 
 	return (
 		<>
+
+			{/* <BrowserRouter>
+				<Routes>
+					<Route index element={<Home />} />
+				</Routes>
+			</BrowserRouter> */}
 			<div className="App">Hello World</div>
 			<button onClick={() => wsm.ws?.close()}>disconnect</button>
 			<button onClick={() => wsm.send(
