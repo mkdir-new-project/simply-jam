@@ -67,7 +67,7 @@ class HttpServer {
             }
         })
 
-        this.server.listen(this.PORT);
+        this.server.listen(this.PORT, () => Logger.log(colors.blue('[HTTP_SERVER]'), `Listening on port ${this.PORT}`));
 
     }
 }
