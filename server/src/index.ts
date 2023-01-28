@@ -16,7 +16,7 @@ Logger.DEV = true;
 
 
 // create http server to handle http requests
-const httpserver = new HttpServer(process.env.PORT || 3000);
+const httpserver = new HttpServer(process.env.PORT ? parseInt(process.env.PORT) || 3000);
 
 httpserver.init();
 httpserver.start();
