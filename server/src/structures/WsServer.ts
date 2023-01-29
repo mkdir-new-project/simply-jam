@@ -5,12 +5,14 @@ import WsEvent from "./Events/WsEvent";
 import Message, { MessageTypes } from "../../../shared/structures/Message";
 import User from "./Users/User";
 import Utils from "../utils/Utils";
+
 import Logger from "../../../shared/structures/Logger";
 
 import colors from 'colors/safe';
 import Room from "./Rooms/Room";
+import RadioRoom from "./Rooms/RadioRoom";
 
-class WsServer extends server  {
+class WsServer extends server {
 
     // this map consists of all the events located under /events folder
     // websocket reads the functions to execute on a specific message from here
@@ -18,7 +20,7 @@ class WsServer extends server  {
     // collection of all collected users
     // map { userId: User object }
     users: Map<string, User>;
-    rooms: Map<string, Room>;
+    rooms: Map<string, Room | RadioRoom>;
 
     constructor(httpServer: ReturnType<typeof createServer>) {
         if (!httpServer) throw new Error('No http server found');
@@ -47,7 +49,7 @@ class WsServer extends server  {
 
     }
 
-    broadcastRoom(roomId: string, message: Message|Buffer) {
+    broadcastRoom(roomId: string, message: Message | Buffer) {
         const room = this.rooms.get(roomId);
 
         if (!room || room.users.size === 0) return;
@@ -63,7 +65,7 @@ class WsServer extends server  {
         this.on('connect', (connection) => {
             // one doutb
             // add new user to users map
-            
+
             const user = new User({ connection });
             connection.id = user.userId;
 
@@ -77,7 +79,7 @@ class WsServer extends server  {
         });
 
         // user disconnected, remove from users map followok
-        
+
         this.on('close', (connection, _number, _description) => {
             this.users.delete(connection.id);
 
@@ -87,8 +89,8 @@ class WsServer extends server  {
 
 
         })
-        
-        
+
+
         // new websocket request
         this.on('request', request => {
 
@@ -101,7 +103,7 @@ class WsServer extends server  {
             connection.on('message', message => {
                 // we only want to accept binary data, binary is smaller and faster than strings. 
                 if (message.type == 'utf8') return console.error('invalid ws message type');
-                
+
                 // message is my custom class to encode and decode into smaller pakcets for sex speed
                 // i'll show later
                 // inflate converts raw binary data to human readable format
@@ -114,7 +116,7 @@ class WsServer extends server  {
 
                 Logger.log(colors.blue('[WS_CLIENT]'), `[${MessageTypes[data.type]}] ->`, data);
 
-                
+
                 // see if the event sent from client is registered on server side
                 const wsevent = this.events.get(data.type);
 

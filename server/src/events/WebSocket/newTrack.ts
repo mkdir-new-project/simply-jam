@@ -1,6 +1,7 @@
 import WsEvent from "../../structures/Events/WsEvent";
 import Message, { DataTypes, MessageTypes } from "../../../../shared/structures/Message";
 import Music from "../../structures/Music/Music";
+import ytdl from "ytdl-core";
 
 export default new WsEvent({
     messageType: Message.types.NEW_TRACK,
@@ -13,8 +14,10 @@ export default new WsEvent({
         if (!roomId) return;
 
         const room = this.rooms.get(roomId);
+        const videoInfo = await ytdl.getInfo(`https://youtube.com/watch?v=${trackId}`);
+        
         // room.currentTrack = new Music(`https://youtube.com/watch?v=${trackId}`);
-        room.currentTrack = new Music(trackId);
+        room.currentTrack = new Music(trackId, videoInfo.videoDetails);
 
         const toSend = new Message<DataTypes.Server.NEW_TRACK>({
             type: MessageTypes.NEW_TRACK,

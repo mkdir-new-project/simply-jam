@@ -42,7 +42,7 @@ function App() {
 			radio.connectToStream();
 
 
-			radio.start();
+			// radio.start();
 		})
 		// if (wsm._open) radio.start();
 

@@ -2,9 +2,10 @@ import WsEvent from "../../structures/Events/WsEvent";
 import Message from "../../../../shared/structures/Message";
 import Music from "../../structures/Music/Music";
 import RoomTypes from "../../structures/Rooms/RoomTypes";
+import RadioRoom from "../../structures/Rooms/RadioRoom";
 
 export default new WsEvent({
-    messageType: Message.types.GET_TRACK_SEEK,
+    messageType: Message.types.RADIO_GET_TRACK_SEEK,
     async callback(connection, _message) {
 
 
@@ -15,12 +16,9 @@ export default new WsEvent({
 
         const room = this.rooms.get(roomId);
         
-        if (room.roomType === RoomTypes.RADIO) return;
+        if (room.roomType === RoomTypes.PARTY) return;
 
 
-        connection.send(new Message({
-            type: Message.types.GET_TRACK_SEEK,
-            data: [room.currentTrack.serialize()]
-        }).encode())
+        (room as RadioRoom).getTrackSeek(user);
     },
 })

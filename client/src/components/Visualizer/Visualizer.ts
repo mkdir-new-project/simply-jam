@@ -65,7 +65,10 @@ class Visualizer {
             this.src.disconnect();
             this.analyzer.disconnect();
             radio._playing = false;
-            Logger.logc('purple', 'AUDIO_PLAYBACK', 'playback finished');
+            
+            Logger.logc('lightblue', 'VISUALIZER', 'playback finished');
+
+            radio.frame?.stop();
 
             return await handleStart();
         }

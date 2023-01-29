@@ -5,18 +5,19 @@ import Utils from "../../utils/Utils";
 class Music {
     source: string;
     startTime: number;
-    readableStream: internal.Readable|null;
-    seekLength: number;
-    
+    details: ytdl.MoreVideoDetails;
 
-    constructor(url: string) {
+
+    constructor(url: string, details: ytdl.MoreVideoDetails) {
         this.source = url;
         this.startTime = Date.now();
+        this.details = details;
     }
+
 
     serialize() {
         const millis = Date.now() - this.startTime;
-        return { trackId: this.source, seek: Math.floor(millis / 1000)};
+        return { trackId: this.details.videoId, seek: Math.floor(millis / 1000) };
     }
 
     // async getBuffer(): Buffer {

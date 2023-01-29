@@ -11,7 +11,7 @@ class Radio extends EventTarget {
     audio: HTMLAudioElement;
     private _audioResolving: boolean;
     private _socket: WsManager;
-    private frame: AnimationFrame | null;
+    frame: AnimationFrame | null;
     _playing: boolean;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
@@ -35,30 +35,40 @@ class Radio extends EventTarget {
     connectToStream() {
         this._socket.send(
             new Message({
-                type: Message.types.CREATE_ROOM
+                type: Message.types.RADIO_JOIN_ROOM
             })
         )
     }
 
-    start() {
+    requestNewTrack() {
 
-        if (this._audioResolving) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio resolving');;
-
-        if (this._playing) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio already playing');
-
-        this._createAudioElement();
-
-
+        Logger.log('requesting new song')
         this._socket.send(
-            new Message<DataTypes.Client.NEW_TRACK>({
-                type: Message.types.NEW_TRACK,
-                data: [{ trackId: 'rnfYUWn2szo' }]
+            new Message({
+                type: Message.types.RADIO_NEW_TRACK,
             })
         );
     }
 
+    flushAudioElement() {
+
+        this._createAudioElement();
+
+    }
+
+    start() {
+        if (this._audioResolving) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio resolving');;
+
+        if (this._playing) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio already playing');
+
+        this.flushAudioElement();
+
+        this.requestNewTrack();
+
+    }
+
     attachEventListeners() {
-        this._socket.addEventListener(Message.types[Message.types.NEW_TRACK], async (ev: Event) => {
+        this._socket.addEventListener(Message.types[Message.types.RADIO_NEW_TRACK], async (ev: Event) => {
 
             if (!isCustomEvent(ev)) return;
 
@@ -66,19 +76,30 @@ class Radio extends EventTarget {
             if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing cannot load');
 
 
-            const data: DataTypes.Server.NEW_TRACK = ev.detail;
+            const data: DataTypes.Server.RADIO_NEW_TRACK = ev.detail;
 
             this.audio.src = `${this._socket.httpprotocol}://${this._socket.host}/audio?trackId=${data[0].trackId}`;
 
             this._audioResolving = await this._loadAudio();
         });
 
+        this._socket.addEventListener(Message.types[Message.types.RADIO_JOIN_ROOM], async (ev: Event) => {
 
-        this._socket.addEventListener(Message.types[Message.types.GET_TRACK_SEEK], (ev: any) => {
+            if (!isCustomEvent(ev)) return;
+
+            if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted loading before resolving');
+            if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing cannot load');
+
+            this.start();
+
+        });
+
+
+        this._socket.addEventListener(Message.types[Message.types.RADIO_GET_TRACK_SEEK], (ev: any) => {
 
             if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted seek before loadeddata');
             if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing');
-            const ping = this._socket.getPing();
+            const ping = 0//this._socket.getPing();
             Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
             Logger.logc('purple', 'AUDIO_SEEK', ev.detail[0].seek + ping);
 
@@ -107,7 +128,7 @@ class Radio extends EventTarget {
         this._audioResolving = true;
         if (this.frame) this.frame.stop();
 
-        
+
         return new Promise((resolve, reject) => {
             this.audio.load();
 
@@ -127,7 +148,7 @@ class Radio extends EventTarget {
                 Logger.logc('lightgreen', 'AUDIO_LOADER', 'resolved audio');
 
                 this._socket.send(new Message({
-                    type: Message.types.GET_TRACK_SEEK,
+                    type: Message.types.RADIO_GET_TRACK_SEEK,
                 }))
 
 
