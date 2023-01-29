@@ -2,7 +2,7 @@ import Logger from "../../../shared/structures/Logger";
 import Message from "../../../shared/structures/Message";
 import type { DataTypes } from "../../../shared/structures/Message";
 
-const process = { env: { DEV: 'FALSE' } };
+const process = { env: { DEV: 'TRUE' } };
 
 class WsManager extends EventTarget {
 
@@ -11,6 +11,7 @@ class WsManager extends EventTarget {
     host: string;
     wsprotocol: string;
     httpprotocol: string;
+    _open: boolean;
 
     private _lastMessageSent: { m: Message | false, t: number };
 
@@ -23,7 +24,8 @@ class WsManager extends EventTarget {
         this.host = process.env.DEV === 'TRUE' ? 'localhost:3000' : 'simplyjamserver.onrender.com';//'simplyjam.itsananth.repl.co';
         this.wsprotocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
         this.httpprotocol = window.location.protocol === 'http:' ? 'http' : 'https';
-        this._lastMessageSent = { m: false, t: Date.now() }
+        this._lastMessageSent = { m: false, t: Date.now() };
+        this._open = false;
 
     }
 
@@ -69,6 +71,7 @@ class WsManager extends EventTarget {
     }
 
     private onOpen() {
+        this._open = true;
         Logger.logc('blue', 'WS_OPEN', 'eslabished connection to ' + this.host);
         this.wsHandshake();
     }
@@ -84,9 +87,11 @@ class WsManager extends EventTarget {
     private onMessage(event: MessageEvent<any>) {
         const message = Message.inflate(event.data);
 
-        Logger.logc('yellow', 'WS_MESSAGE', message);
 
         if (!message) return;
+
+        Logger.logc('yellow', 'WS_MESSAGE', `${Message.types[message.type]}`,message);
+
 
 
         this.dispatchEvent(new CustomEvent(Message.types[message.type], { detail: message.data }))
