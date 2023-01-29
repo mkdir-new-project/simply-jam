@@ -1,3 +1,6 @@
+import Logger from "../../../../shared/structures/Logger";
+import Radio from "../Radio/Radio";
+
 class Visualizer {
 
     audio: HTMLAudioElement;
@@ -55,12 +58,15 @@ class Visualizer {
         this.bar.width = (this.width / this.bufferLength) * 2.5;
     }
 
-    async render(handleStart: () => Promise<any>) {
+    async render(handleStart: () => Promise<any>, radio: Radio) {
         // requestAnimationFrame(this.render.bind(this, handleStart));
         if (!(this.src && this.analyzer && this.data && this.bufferLength)) return;
         if (~~this.audio.duration !== 0 && ~~this.audio.currentTime >= ~~this.audio.duration) {
             this.src.disconnect();
             this.analyzer.disconnect();
+            radio._playing = false;
+            Logger.logc('purple', 'AUDIO_PLAYBACK', 'playback finished');
+
             return await handleStart();
         }
 
