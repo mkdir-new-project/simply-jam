@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import Logger from '../../shared/structures/Logger';
-import Message, { MessageTypes } from "../../shared/structures/Message";
+import Message, { DataTypes, MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { isCustomEvent } from './utils';
 
 declare global {
 	interface Window {
@@ -25,10 +26,14 @@ function App() {
 
 
 	useEffect(() => {
-		wsm.addEventListener(Message.types[Message.types.NEW_TRACK], (ev: any) => {
+		wsm.addEventListener(Message.types[Message.types.NEW_TRACK], (ev: Event) => {
+
+			if (!isCustomEvent(ev)) return;
+
+			const data: DataTypes.Server.NEW_TRACK = ev.detail;
 
 			audio.crossOrigin = 'anonymous';
-			audio.src = `${wsm.httpprotocol}://${wsm.host}/audio?trackId=${ev.detail[0].trackId}`;
+			audio.src = `${wsm.httpprotocol}://${wsm.host}/audio?trackId=${data[0].trackId}`;
 
 		})
 
@@ -80,9 +85,9 @@ function App() {
 			)}>Join Room</button>
 
 			<button onClick={() => wsm.send(
-				new Message({
+				new Message<DataTypes.Client.NEW_TRACK>({
 					type: Message.types.NEW_TRACK,
-					data: ['64CnG-9oprM']
+					data: [{ trackId: '64CnG-9oprM' }]
 				})
 			)}>set new track</button>
 			<button onClick={() => {

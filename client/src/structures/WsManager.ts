@@ -1,5 +1,6 @@
 import Logger from "../../../shared/structures/Logger";
 import Message from "../../../shared/structures/Message";
+import type { DataTypes } from "../../../shared/structures/Message";
 
 const process = { env: { DEV: 'FALSE' } };
 
@@ -11,6 +12,8 @@ class WsManager extends EventTarget {
     wsprotocol: string;
     httpprotocol: string;
 
+    private _lastMessageSent: { m: Message | false, t: number };
+
 
     constructor() {
         super();
@@ -20,12 +23,13 @@ class WsManager extends EventTarget {
         this.host = process.env.DEV === 'TRUE' ? 'localhost:3000' : 'simplyjamserver.onrender.com';//'simplyjam.itsananth.repl.co';
         this.wsprotocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
         this.httpprotocol = window.location.protocol === 'http:' ? 'http' : 'https';
+        this._lastMessageSent = { m: false, t: Date.now() }
 
     }
 
     private wsHandshake() {
-        this.ws?.send(
-            new Message({ type: Message.types.CONNECT }).encode()
+        this.send(
+            new Message<DataTypes.Client.CONNECT>({ type: Message.types.CONNECT, data: [{ username: 'test' }] })
         )
     }
 
@@ -44,17 +48,24 @@ class WsManager extends EventTarget {
     }
 
     send(data: Message | Buffer) {
-        let message: Buffer;
+        let message: Buffer, m: Message | false;
         if (data instanceof Message) {
             message = data.encode();
-        } else
+            m = data;
+        } else {
             message = data;
+            m = Message.inflate(data);
+        }
 
         this.ws?.send(message);
+        this._lastMessageSent = {
+            m: m,
+            t: Date.now()
+        }
     }
 
     getPing() {
-        return (Date.now() - this.lt) / 1000;
+        return (Date.now() - this._lastMessageSent.t) / 1000;
     }
 
     private onOpen() {
