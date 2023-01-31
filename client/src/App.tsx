@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import Logger from '../../shared/structures/Logger';
 import Message, { DataTypes, MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
+import '../public/global.css'
+
+import { AppShell } from './components/AppShell';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { isCustomEvent } from './utils';
 import Radio from './components/Radio/Radio';
