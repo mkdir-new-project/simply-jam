@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import Logger from '../../shared/structures/Logger';
-import Message, { MessageTypes } from "../../shared/structures/Message";
+import Message, { DataTypes, MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
+<<<<<<< HEAD
 import '../public/global.css'
 
 import { AppShell } from './components/AppShell';
+=======
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { isCustomEvent } from './utils';
+import Radio from './components/Radio/Radio';
+>>>>>>> 5285e49c264289608c4535da1d2d96c593639f3e
 
 declare global {
 	interface Window {
@@ -14,37 +20,63 @@ declare global {
 
 function App() {
 
-	const audioRef = useRef<HTMLAudioElement>(null);
+	const canvas = useRef<HTMLCanvasElement>(null);
+	const progress = useRef<HTMLProgressElement>(null);
 	const wsm = new WsManager();
 	const audio = new Audio();
+	let radio: Radio;
 
-	// @ts-ignore
-	window.audio = audio;
+	if (true) {
+		// @ts-ignore
+		window.audio = audio;
+		Logger.DEV = true;
+	}
 
 
 
 	useEffect(() => {
-		wsm.addEventListener(Message.types[Message.types.NEW_TRACK], (ev: any) => {
+		if (!(canvas.current && progress.current)) return;
+		canvas.current.width = window.innerWidth;
+		canvas.current.height = window.innerHeight;
 
-			audio.crossOrigin = 'anonymous';
-			audio.src = `http://${'localhost:3000'}/audio?trackId=${ev.detail[0].trackId}`;
+		radio = new Radio(wsm, canvas.current as HTMLCanvasElement, progress.current as HTMLProgressElement);
+		radio.attachEventListeners();
 
+		wsm.addEventListener(Message.types[Message.types.CONNECT], (ev: Event) => {
+			if (!isCustomEvent(ev)) return;
+
+			radio.connectToStream();
+
+
+			// radio.start();
 		})
+		// if (wsm._open) radio.start();
 
-		wsm.addEventListener(Message.types[Message.types.GET_TRACK_SEEK], (ev: any) => {
-			const ping = (Date.now() - wsm.lt) / 1000;
-			Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
-			Logger.logc('purple', 'AUDIO_SEEK', ev.detail[0].seek + ping);
+		// wsm.addEventListener(Message.types[Message.types.NEW_TRACK], (ev: Event) => {
 
-			audio.currentTime = ev.detail[0].seek + ping;
+		// 	if (!isCustomEvent(ev)) return;
 
-			audio.play();
+		// 	const data: DataTypes.Server.NEW_TRACK = ev.detail;
+
+		// 	audio.crossOrigin = 'anonymous';
+		// 	audio.src = `${wsm.httpprotocol}://${wsm.host}/audio?trackId=${data[0].trackId}`;
+
+		// })
+
+		// wsm.addEventListener(Message.types[Message.types.GET_TRACK_SEEK], (ev: any) => {
+		// 	const ping = wsm.getPing();
+		// 	Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
+		// 	Logger.logc('purple', 'AUDIO_SEEK', ev.detail[0].seek + ping);
+
+		// 	radio.audio.currentTime = ev.detail[0].seek + ping;
+
+		// 	radio.audio.play();
 
 
 
-		})
+		// })
 
-	}, [audioRef]);
+	}, [canvas, progress]);
 
 	wsm.connect();
 
@@ -76,9 +108,9 @@ function App() {
 			)}>Join Room</button>
 
 			<button onClick={() => wsm.send(
-				new Message({
+				new Message<DataTypes.Client.NEW_TRACK>({
 					type: Message.types.NEW_TRACK,
-					data: ['64CnG-9oprM']
+					data: [{ trackId: '64CnG-9oprM' }]
 				})
 			)}>set new track</button>
 			<button onClick={() => {

@@ -2,6 +2,7 @@ import WsEvent from "../../structures/Events/WsEvent";
 import Message from "../../../../shared/structures/Message";
 import WsServer from "../../structures/WsServer";
 import Logger from "../../../../shared/structures/Logger";
+import RoomTypes from "../../structures/Rooms/RoomTypes";
 
 export default new WsEvent({
     messageType: Message.types.JOIN_ROOM,
@@ -15,6 +16,7 @@ export default new WsEvent({
         console.log('join room', room)
 
         if (user.roomId != null || !room) return;
+        if (room.roomType == RoomTypes.RADIO) return;
 
         user.roomId = room.roomId;
         room.users.set(user.userId, user);

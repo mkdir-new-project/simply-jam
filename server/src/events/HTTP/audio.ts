@@ -18,7 +18,8 @@ export default new HttpEvent({
 
 
         if (!trackId) return;
-        const track = ytdl(`https://youtube.com/watch?v=${trackId}`, { filter: 'audioonly' });
+        const videoURL = `https://youtube.com/watch?v=${trackId}`;
+        const track = ytdl(videoURL, { filter: 'audioonly' });
         total = await getLen(track) as number;
 
 
