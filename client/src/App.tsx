@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import Logger from '../../shared/structures/Logger';
 import Message, { MessageTypes } from "../../shared/structures/Message";
 import WsManager from './structures/WsManager';
-import './global.css'
+import '../public/global.css'
+
+import { AppShell } from './components/AppShell';
 
 declare global {
 	interface Window {
@@ -51,6 +53,7 @@ function App() {
 
 	return (
 		<>
+			<AppShell />{/* 
 			<h1 className="text-3xl font-bold underline">
 				Hello world!
 			</h1>
@@ -91,7 +94,7 @@ function App() {
 			<button onClick={() => {
 				audio.volume = audio.volume != 0 ? 0 : 1;
 			}}>mute</button>
-			<audio ref={audioRef}></audio>
+			<audio ref={audioRef}></audio> */}
 
 		</>
 	)
