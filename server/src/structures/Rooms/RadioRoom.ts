@@ -21,6 +21,7 @@ class RadioRoom implements BaseRoom {
     requestQueue: User[];
     timer: boolean;
     roomType: RoomTypes.RADIO;
+    bufferPadding: number;
 
     constructor() {
         this.users = new Map();
@@ -31,6 +32,8 @@ class RadioRoom implements BaseRoom {
         this.roomType = RoomTypes.RADIO;
         this.timer = false;
         this.requestQueue = [];
+        this.bufferPadding = 3;
+
     }
 
     getTrackSeek(user: User) {
@@ -59,19 +62,18 @@ class RadioRoom implements BaseRoom {
             const dt = Math.floor(t.startTime / 1000); //new Date(t.startTime);
 
 
-            // if (t.startTime > now) continue;
             console.log(dt, dn);
             if (dt > dn) continue;
-            // if (dt.getSeconds() > dn.getSeconds()) continue;
+
 
             const serialized = t.serialize();
             const duration = parseInt(t.details.lengthSeconds);
-            const seek = serialized.seek;//Math.max(0, serialized.seek);
+            const seek = serialized.seek;
             const diff = duration - seek;
-            index = i;//(serialized.seek >= duration) ? i + 1 : i;
+            index = i;
             Logger.log(t.details.title, seek, duration, diff)
             
-            if (diff > 0 && diff < 3)  {
+            if (diff > 0 && diff < this.bufferPadding)  {
                 await wait(diff * 1000);
                 index++;
             }
@@ -89,51 +91,6 @@ class RadioRoom implements BaseRoom {
             break;
         }
     }
-
-
-    // getCurrentTrack(user: User) {
-    //     const track = this.trackQueue[this.currentTrack];
-    //     const diff = (Date.now() - track.startTime);
-    //     const videoLenMs = (parseInt(track.details.lengthSeconds) * 1000);
-
-    //     console.log(diff, videoLenMs)
-    //     if (diff < videoLenMs) {
-
-    //                     // if (this.timer) return;
-
-    //         // this.timer = true;
-
-    //         // setTimeout(() => {
-
-
-    //         user.connection.send(
-    //             new Message<DataTypes.Server.RADIO_NEW_TRACK>({
-    //                 type: Message.types.RADIO_NEW_TRACK,
-    //                 data: [this.trackQueue[this.currentTrack].serialize()]
-    //             }).encode()
-    //         )
-
-
-    //     } else {
-    //         this.requestQueue.push(user);
-
-
-    //         this.timer = false;
-    //         this.currentTrack++;
-    //         this.trackQueue[this.currentTrack].startTime = Date.now();
-    //         this.requestQueue.forEach(user => {
-    //             user.connection.send(
-    //                 new Message<DataTypes.Server.RADIO_NEW_TRACK>({
-    //                     type: Message.types.RADIO_NEW_TRACK,
-    //                     data: [this.trackQueue[this.currentTrack].serialize()]
-    //                 }).encode()
-    //             )
-    //         })
-    //         // }, diff);
-
-
-    //     }
-    // }
 }
 
 export default RadioRoom;
