@@ -36,6 +36,16 @@ class RadioRoom implements BaseRoom {
 
     }
 
+    broadcast(message: Message|Buffer) {
+        const msg = message instanceof Buffer ? message : message.encode();
+        const users = [...this.users.values()];
+
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            user.connection.send(message);
+        };
+    }
+
     getTrackSeek(user: User) {
 
 
@@ -66,16 +76,43 @@ class RadioRoom implements BaseRoom {
             if (dt > dn) continue;
 
 
+
+
+
             const serialized = t.serialize();
             const duration = parseInt(t.details.lengthSeconds);
             const seek = serialized.seek;
-            const diff = duration - seek;
+            let diff = duration - seek;
             index = i;
-            Logger.log(t.details.title, seek, duration, diff)
+            Logger.log(t.details.title, seek, duration, diff, index)
+
             
-            if (diff > 0 && diff < this.bufferPadding)  {
+            /**
+             * if seek is less than song duration and there's only 3 seconds left to finish 
+             * then send the next song 
+             * because the song will end by the time it reaches the end user
+             */
+            if (diff >= 0 && diff < this.bufferPadding)  {
+                // await wait((diff + 10) * 1000);
+                Logger.log('waiting ' + diff * 1000 + ' ms');
                 await wait(diff * 1000);
                 index++;
+            }
+
+
+
+            /**
+             * radio broadcast has already ended when index is higher than track queue or 
+             * seek is negative
+             */
+            if (diff < 0 || index > this.trackQueue.length - 1) {
+            
+                user.connection.send(
+                    new Message({
+                        type: Message.types.RADIO_BROADCAST_FINISH
+                    }).encode()
+                )
+                return;
             }
 
             user.index = index;

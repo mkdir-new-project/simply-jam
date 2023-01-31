@@ -18,6 +18,7 @@ class Radio extends EventTarget {
     ctx: CanvasRenderingContext2D;
     progress: HTMLProgressElement;
     title: HTMLDivElement;
+    visualizer: Visualizer | null;
 
     constructor(wsm: WsManager, canvas: HTMLCanvasElement, progress: HTMLProgressElement, title: HTMLDivElement) {
         super();
@@ -31,6 +32,7 @@ class Radio extends EventTarget {
         this.frame = null;
         this._lastTrackTime = Date.now();
         this.title = title;
+        this.visualizer = null;
 
         this.audio.onerror = Logger.error;
     }
@@ -59,7 +61,11 @@ class Radio extends EventTarget {
 
     }
 
-    start() {
+    start(isInitialStart = true) {
+        this.frame?.stop();
+        
+        if (!isInitialStart) this.progress.value = 1000;
+        
         if (this._audioResolving) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio resolving');;
 
         if (this._playing) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio already playing');
@@ -71,6 +77,23 @@ class Radio extends EventTarget {
     }
 
     attachEventListeners() {
+        this._socket.addEventListener(Message.types[Message.types.RADIO_BROADCAST_FINISH], async (ev: Event) => {
+
+            if (!isCustomEvent(ev)) return;
+
+            if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted loading before resolving');
+            if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing cannot load');
+
+
+            const data: any = ev.detail;
+
+            this.visualizer?.disconnect();
+            this.frame?.stop();
+
+            this.title.innerText = 'Radio Broadcast Finished';
+
+        });
+
         this._socket.addEventListener(Message.types[Message.types.RADIO_NEW_TRACK], async (ev: Event) => {
 
             if (!isCustomEvent(ev)) return;
@@ -114,12 +137,10 @@ class Radio extends EventTarget {
             Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
             Logger.logc('purple', 'AUDIO_SEEK', seek + ping, 'audio seek corrected');
 
-            this.audio.currentTime = seek + ping;
+            this.audio.currentTime = Math.max(seek + ping, 0);
 
             this.audio.play();
             this.frame?.start();
-
-
         });
 
     }
@@ -131,6 +152,18 @@ class Radio extends EventTarget {
         this.audio.addEventListener('timeupdate', () => {
             const percent = Math.floor((this.audio.currentTime / this.audio.duration) * 1000);
             this.progress.value = percent === Infinity ? 0 : percent;
+        })
+
+        this.audio.addEventListener('ended', (ev: Event) => {
+            console.log('ended');
+            this.visualizer?.disconnect();
+            this._playing = false;
+
+            Logger.logc('lightblue', 'VISUALIZER', 'playback finished');
+
+            this.start(false)
+
+            // this.frame?.stop();
         })
     }
 
@@ -144,6 +177,7 @@ class Radio extends EventTarget {
             this.audio.load();
 
             const visualizer = new Visualizer(this.audio, this.canvas);
+            this.visualizer = visualizer;
 
             visualizer.connect();
 

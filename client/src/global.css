@@ -64,5 +64,6 @@ progress::-webkit-progress-bar {
 
 progress::-webkit-progress-value {
     background-color: #ccc;
+    transition: all 0.3s;
 
 }
