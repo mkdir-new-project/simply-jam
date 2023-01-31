@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/mkdir-new-project/simply-jam#readme",
   "dependencies": {
+    "@reduxjs/toolkit": "^1.9.2",
     "@types/msgpack-lite": "^0.1.8",
     "@types/node": "^18.11.18",
     "msgpack-lite": "^0.1.26",
