@@ -1,9 +1,16 @@
+import Logger from "../../../../shared/structures/Logger";
 import Message, { DataTypes } from "../../../../shared/structures/Message";
 import Utils from "../../utils/Utils";
 import Music from "../Music/Music";
 import User from "../Users/User";
 import BaseRoom from "./Base";
 import RoomTypes from "./RoomTypes";
+
+function wait(ms: number) {
+    return new Promise(res => {
+        setTimeout(res, ms);
+    })
+}
 
 class RadioRoom implements BaseRoom {
     users: Map<string, User>;
@@ -31,8 +38,6 @@ class RadioRoom implements BaseRoom {
 
         const t = this.trackQueue[user.index];
 
-        console.log('seek', Date.now() - t.startTime / 1000)
-
         user.connection.send(
             new Message({
                 type: Message.types.RADIO_GET_TRACK_SEEK,
@@ -44,25 +49,44 @@ class RadioRoom implements BaseRoom {
 
     }
 
-    getCurrentTrack(user: User) {
-        const now = Date.now();
-        const dn = new Date(now);
+    async getCurrentTrack(user: User) {
+        let now = Date.now();
+        const dn = Math.floor(now / 1000); //new Date(now);
+        let index;
         for (let i = this.trackQueue.length - 1; i >= 0; i--) {
+            now = Date.now();
             const t = this.trackQueue[i];
-            const dt = new Date(t.startTime);
+            const dt = Math.floor(t.startTime / 1000); //new Date(t.startTime);
 
 
             // if (t.startTime > now) continue;
-            if (dt.getSeconds() > dn.getSeconds()) continue;
-            user.index = i;
+            console.log(dt, dn);
+            if (dt > dn) continue;
+            // if (dt.getSeconds() > dn.getSeconds()) continue;
+
+            const serialized = t.serialize();
+            const duration = parseInt(t.details.lengthSeconds);
+            const seek = serialized.seek;//Math.max(0, serialized.seek);
+            const diff = duration - seek;
+            index = i;//(serialized.seek >= duration) ? i + 1 : i;
+            Logger.log(t.details.title, seek, duration, diff)
+            
+            if (diff > 0 && diff < 3)  {
+                await wait(diff * 1000);
+                index++;
+            }
+
+            user.index = index;
 
             user.connection.send(
                 new Message({
                     type: Message.types.RADIO_NEW_TRACK,
-                    data: [{ ...t.serialize() }]
+                    data: [{ ...this.trackQueue[index].serialize() }]
 
                 }).encode()
             )
+
+            break;
         }
     }
 

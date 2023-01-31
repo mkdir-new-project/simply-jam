@@ -11,6 +11,7 @@ class Radio extends EventTarget {
     audio: HTMLAudioElement;
     private _audioResolving: boolean;
     private _socket: WsManager;
+    private _lastTrackTime: number;
     frame: AnimationFrame | null;
     _playing: boolean;
     canvas: HTMLCanvasElement;
@@ -27,7 +28,7 @@ class Radio extends EventTarget {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
         this.frame = null;
-
+        this._lastTrackTime = Date.now();
 
         this.audio.onerror = Logger.error;
     }
@@ -80,6 +81,7 @@ class Radio extends EventTarget {
 
             this.audio.src = `${this._socket.httpprotocol}://${this._socket.host}/audio?trackId=${data[0].trackId}`;
 
+            this._lastTrackTime = Date.now();
             this._audioResolving = await this._loadAudio();
         });
 
@@ -99,11 +101,13 @@ class Radio extends EventTarget {
 
             if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted seek before loadeddata');
             if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing');
-            const ping = 0//this._socket.getPing();
+            const ping = this._socket.getPing();
             Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
             Logger.logc('purple', 'AUDIO_SEEK', ev.detail[0].seek + ping);
 
             this.audio.currentTime = ev.detail[0].seek + ping;
+
+            console.log(ev.detail[0].seek, Math.round(Date.now() - this._lastTrackTime) / 1000);
 
             this.audio.play();
             this.frame?.start();
