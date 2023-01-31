@@ -16,6 +16,7 @@ function App() {
 
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const progress = useRef<HTMLProgressElement>(null);
+	const title = useRef<HTMLDivElement>(null);
 	const wsm = new WsManager();
 	const audio = new Audio();
 	let radio: Radio;
@@ -33,7 +34,7 @@ function App() {
 		canvas.current.width = window.innerWidth;
 		canvas.current.height = window.innerHeight;
 
-		radio = new Radio(wsm, canvas.current as HTMLCanvasElement, progress.current as HTMLProgressElement);
+		radio = new Radio(wsm, canvas.current as HTMLCanvasElement, progress.current as HTMLProgressElement, title.current as HTMLDivElement);
 		radio.attachEventListeners();
 
 		wsm.addEventListener(Message.types[Message.types.CONNECT], (ev: Event) => {
@@ -43,7 +44,7 @@ function App() {
 
 
 			// radio.start();
-		})
+		});
 		// if (wsm._open) radio.start();
 
 		// wsm.addEventListener(Message.types[Message.types.NEW_TRACK], (ev: Event) => {
@@ -70,7 +71,7 @@ function App() {
 
 		// })
 
-	}, [canvas, progress]);
+	}, [canvas, progress, title]);
 
 	wsm.connect();
 
@@ -81,7 +82,10 @@ function App() {
 		<>
 			<div className="container">
 				<div className="overlay">
-					<progress className='controls' ref={progress} value={10} max={1000}></progress>
+					<div className='controls'>
+						<div className="trackTitle" ref={title}>TEST TITLE</div>
+						<progress className='progressbar' ref={progress} value={0} max={1000}></progress>
+					</div>
 				</div>
 				<canvas id='canvas' ref={canvas}></canvas>
 			</div>
