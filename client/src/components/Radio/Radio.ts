@@ -17,8 +17,9 @@ class Radio extends EventTarget {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     progress: HTMLProgressElement;
+    title: HTMLDivElement;
 
-    constructor(wsm: WsManager, canvas: HTMLCanvasElement, progress: HTMLProgressElement) {
+    constructor(wsm: WsManager, canvas: HTMLCanvasElement, progress: HTMLProgressElement, title: HTMLDivElement) {
         super();
         this._socket = wsm;
         this._audioResolving = false;
@@ -29,6 +30,7 @@ class Radio extends EventTarget {
         this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
         this.frame = null;
         this._lastTrackTime = Date.now();
+        this.title = title;
 
         this.audio.onerror = Logger.error;
     }
@@ -62,7 +64,7 @@ class Radio extends EventTarget {
 
         if (this._playing) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio already playing');
 
-        this.flushAudioElement();
+        this._createAudioElement();
 
         this.requestNewTrack();
 
@@ -82,6 +84,7 @@ class Radio extends EventTarget {
             this.audio.src = `${this._socket.httpprotocol}://${this._socket.host}/audio?trackId=${data[0].trackId}`;
 
             this._lastTrackTime = Date.now();
+            this.title.innerText = data[0].title;
             this._audioResolving = await this._loadAudio();
         });
 
@@ -92,6 +95,8 @@ class Radio extends EventTarget {
             if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted loading before resolving');
             if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing cannot load');
 
+            Logger.logc('lightyellow', 'RADIO', 'Joined radio lobby');
+
             this.start();
 
         });
@@ -99,15 +104,17 @@ class Radio extends EventTarget {
 
         this._socket.addEventListener(Message.types[Message.types.RADIO_GET_TRACK_SEEK], (ev: any) => {
 
+            if (!isCustomEvent(ev)) return;
             if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted seek before loadeddata');
             if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing');
             const ping = this._socket.getPing();
+            const data: DataTypes.Server.RADIO_GET_TRACK_SEEK = ev.detail;
+            const seek = data[0].seek;
+
             Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
-            Logger.logc('purple', 'AUDIO_SEEK', ev.detail[0].seek + ping);
+            Logger.logc('purple', 'AUDIO_SEEK', seek + ping, 'audio seek corrected');
 
-            this.audio.currentTime = ev.detail[0].seek + ping;
-
-            console.log(ev.detail[0].seek, Math.round(Date.now() - this._lastTrackTime) / 1000);
+            this.audio.currentTime = seek + ping;
 
             this.audio.play();
             this.frame?.start();
@@ -123,7 +130,7 @@ class Radio extends EventTarget {
 
         this.audio.addEventListener('timeupdate', () => {
             const percent = Math.floor((this.audio.currentTime / this.audio.duration) * 1000);
-            this.progress.value = percent;
+            this.progress.value = percent === Infinity ? 0 : percent;
         })
     }
 
@@ -141,18 +148,14 @@ class Radio extends EventTarget {
             visualizer.connect();
 
 
-            this.frame = new AnimationFrame(60, visualizer.render.bind(visualizer, this.start.bind(_this) as any, _this), [emitDuration, clear]);
-
-            this.audio.addEventListener('ended', () => {
-                console.log('ended')
-            })
+            this.frame = new AnimationFrame(60, visualizer.render.bind(visualizer, this.start.bind(_this) as any, _this));
 
             this.audio.addEventListener('loadeddata', () => {
 
                 Logger.logc('lightgreen', 'AUDIO_LOADER', 'resolved audio');
 
                 this._socket.send(new Message({
-                    type: Message.types.RADIO_GET_TRACK_SEEK,
+                    type: Message.types.RADIO_GET_TRACK_SEEK
                 }))
 
 
@@ -161,17 +164,6 @@ class Radio extends EventTarget {
 
                 resolve(false);
             })
-
-            function emitDuration() {
-
-
-            }
-
-            function clear() {
-                visualizer.ctx.clearRect(0, 0, visualizer.width, visualizer.height);
-            }
-
-            // const frame = new AnimationFrame(60, visualizer.render)
         })
 
     }

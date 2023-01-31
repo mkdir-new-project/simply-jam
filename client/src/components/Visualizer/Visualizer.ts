@@ -74,15 +74,15 @@ class Visualizer {
         }
 
 
+        this.ctx.clearRect(0, 0, this.width, this.height);
         let dx = 0;
         this.analyzer.getByteFrequencyData(this.data);
 
         // this.ctx.clearRect(0, 0, this.width, this.height);
 
         for (let i = 0; i < this.bufferLength; i++) {
-            let maxH = (this.data[i] * 2) * 95 / 100;
+            let maxH = (this.data[i] * 2);// * 98 / 100;
             this.bar.height = Math.max(maxH / 2, 1);
-
             let r = this.bar.height + (this.theme * (i / this.bufferLength)),
                 g = this.theme * (i / this.bufferLength),
                 b = this.theme;
