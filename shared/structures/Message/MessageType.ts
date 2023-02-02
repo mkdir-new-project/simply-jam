@@ -16,7 +16,9 @@ enum MessageTypes {
     RADIO_NEW_TRACK,
     RADIO_GET_TRACK_SEEK,
     RADIO_JOIN_ROOM,
-    RADIO_LEAVE_ROOM
+    RADIO_LEAVE_ROOM,
+    RADIO_BROADCAST_FINISH,
+    RADIO_BROADCAST_START
 }
 
 export default MessageTypes;

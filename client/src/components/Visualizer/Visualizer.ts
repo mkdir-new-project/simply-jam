@@ -58,31 +58,37 @@ class Visualizer {
         this.bar.width = (this.width / this.bufferLength) * 2.5;
     }
 
-    async render(handleStart: () => Promise<any>, radio: Radio) {
+    disconnect() {
+        if (!(this.src && this.analyzer)) return;
+        this.src.disconnect();
+        this.analyzer.disconnect();
+    }
+
+    async render(handleStart: Radio['start'], radio: Radio) {
         // requestAnimationFrame(this.render.bind(this, handleStart));
         if (!(this.src && this.analyzer && this.data && this.bufferLength)) return;
-        if (~~this.audio.duration !== 0 && ~~this.audio.currentTime >= ~~this.audio.duration) {
-            this.src.disconnect();
-            this.analyzer.disconnect();
-            radio._playing = false;
+        // if (~~this.audio.duration !== 0 && ~~this.audio.currentTime >= ~~this.audio.duration) {
+        //     this.src.disconnect();
+        //     this.analyzer.disconnect();
+        //     radio._playing = false;
             
-            Logger.logc('lightblue', 'VISUALIZER', 'playback finished');
+        //     Logger.logc('lightblue', 'VISUALIZER', 'playback finished');
 
-            radio.frame?.stop();
+        //     // radio.frame?.stop();
 
-            return await handleStart();
-        }
+        //     return await handleStart(false);
+        // }
 
 
+        this.ctx.clearRect(0, 0, this.width, this.height);
         let dx = 0;
         this.analyzer.getByteFrequencyData(this.data);
 
         // this.ctx.clearRect(0, 0, this.width, this.height);
 
         for (let i = 0; i < this.bufferLength; i++) {
-            let maxH = (this.data[i] * 2) * 95 / 100;
+            let maxH = (this.data[i] * 2);// * 98 / 100;
             this.bar.height = Math.max(maxH / 2, 1);
-
             let r = this.bar.height + (this.theme * (i / this.bufferLength)),
                 g = this.theme * (i / this.bufferLength),
                 b = this.theme;

@@ -90,7 +90,7 @@ class WsManager extends EventTarget {
 
         if (!message) return;
 
-        Logger.logc('yellow', 'WS_MESSAGE', `${Message.types[message.type]}`,message);
+        Logger.logc('yellow', 'WS_MESSAGE', `${Message.types[message.type]}`, message);
 
 
 

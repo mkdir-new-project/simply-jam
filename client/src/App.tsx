@@ -19,6 +19,7 @@ function App() {
 
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const progress = useRef<HTMLProgressElement>(null);
+	const title = useRef<HTMLDivElement>(null);
 	const wsm = new WsManager();
 	const audio = new Audio();
 	let radio: Radio;
@@ -36,7 +37,7 @@ function App() {
 		canvas.current.width = window.innerWidth;
 		canvas.current.height = window.innerHeight;
 
-		radio = new Radio(wsm, canvas.current as HTMLCanvasElement, progress.current as HTMLProgressElement);
+		radio = new Radio(wsm, canvas.current as HTMLCanvasElement, progress.current as HTMLProgressElement, title.current as HTMLDivElement);
 		radio.attachEventListeners();
 
 		wsm.addEventListener(Message.types[Message.types.CONNECT], (ev: Event) => {
@@ -45,35 +46,10 @@ function App() {
 			radio.connectToStream();
 
 
-			// radio.start();
-		})
-		// if (wsm._open) radio.start();
-
-		// wsm.addEventListener(Message.types[Message.types.NEW_TRACK], (ev: Event) => {
-
-		// 	if (!isCustomEvent(ev)) return;
-
-		// 	const data: DataTypes.Server.NEW_TRACK = ev.detail;
-
-		// 	audio.crossOrigin = 'anonymous';
-		// 	audio.src = `${wsm.httpprotocol}://${wsm.host}/audio?trackId=${data[0].trackId}`;
-
-		// })
-
-		// wsm.addEventListener(Message.types[Message.types.GET_TRACK_SEEK], (ev: any) => {
-		// 	const ping = wsm.getPing();
-		// 	Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
-		// 	Logger.logc('purple', 'AUDIO_SEEK', ev.detail[0].seek + ping);
-
-		// 	radio.audio.currentTime = ev.detail[0].seek + ping;
-
-		// 	radio.audio.play();
+		});
 
 
-
-		// })
-
-	}, [canvas, progress]);
+	}, [canvas, progress, title]);
 
 	wsm.connect();
 
@@ -82,58 +58,19 @@ function App() {
 
 	return (
 		<>
-			<AppShell />{/* 
-			<h1 className="text-3xl font-bold underline">
-				Hello world!
-			</h1>
-			<button onClick={() => wsm.ws?.close()}>disconnect</button>
-			<button onClick={() => wsm.send(
-				new Message({
-					type: Message.types.GET_TRACK
-				})
-			)}>Get track data</button>
-			<button onClick={() => wsm.send(
-				new Message({
-					type: Message.types.CREATE_ROOM
-				})
-			)}>Create Room</button>
-			<button onClick={() => wsm.send(
-				new Message({
-					type: Message.types.JOIN_ROOM,
-					data: ['123']
-				})
-			)}>Join Room</button>
-
-			<button onClick={() => wsm.send(
-				new Message<DataTypes.Client.NEW_TRACK>({
-					type: Message.types.NEW_TRACK,
-					data: [{ trackId: '64CnG-9oprM' }]
-				})
-			)}>set new track</button>
-			<button onClick={() => {
-				audio.load();
-
-				audio.addEventListener('loadeddata', () => {
-					wsm.lt = Date.now();
-					wsm.send(new Message({
-						type: Message.types.GET_TRACK_SEEK,
-					}))
-				})
-			}}>Play</button>
-			<button onClick={() => {
-				audio.volume = audio.volume != 0 ? 0 : 1;
-			}}>mute</button>
-			<audio ref={audioRef}></audio> */}
+			<div className="container">
+				<div className="overlay">
+					<div className='controls'>
+						<div className="trackTitle" ref={title}>Loading</div>
+						<progress className='progressbar' ref={progress} value={0} max={1000}></progress>
+					</div>
+				</div>
+				<canvas id='canvas' ref={canvas}></canvas>
+			</div>
 
 		</>
 	)
 }
 
-function millisToMinutesAndSeconds(millis: number) {
-	var minutes = Math.floor(millis / 60000);
-	var seconds = ((millis % 60000) / 1000).toFixed(0);
-	// @ts-ignore
-	return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
-}
 
 export default App
