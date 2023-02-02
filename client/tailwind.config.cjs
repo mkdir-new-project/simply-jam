@@ -13,7 +13,10 @@ module.exports = {
         "text-2": "#aaaaaa",
         "text-3": "#666666",
         "text-4": "#555555",
-      }
+      },
+      fontFamily: {
+        'inter': ['Inter', 'sans-serif'],
+      },
     },
   },
   plugins: [],

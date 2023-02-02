@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useRef } from "react";
+
+import { PlayerCurrentlyPlaying } from "./PlayerCurrentlyPlaying";
 
 export const Player: React.FC = () => {
+    const currentlyPlayingRef = useRef<HTMLDivElement>(null);
     return (
-        <div className="w-full bg-depth-0 mr-auto">
-            wow
-        </div>
+        <PlayerCurrentlyPlaying ref={currentlyPlayingRef} />
     )
 }

@@ -7,6 +7,10 @@ interface ChatEventProps {
     text: string;
 }
 
-export const ChatEvent: React.FC<ChatEventProps> = () => {
-    return (<></>)
+export const ChatEvent: React.FC<ChatEventProps> = ({ text }) => {
+    return (<>
+        <div className="text-text-4 text-xs italic mb-1">
+            {text}
+        </div>
+    </>)
 };
