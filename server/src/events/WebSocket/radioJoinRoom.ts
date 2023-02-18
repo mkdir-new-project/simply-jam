@@ -8,8 +8,9 @@ export default new WsEvent<DataTypes.Client.RADIO_JOIN_ROOM>({
     async callback(this: WsServer, connection, _message){
 
         const user = this.users.get(connection.id);
+        const roomId = _message.data[0].roomId;
 
-        const room = this.rooms.get(`radio_1234`);
+        const room = this.rooms.get(roomId);
 
         if (user.roomId != null || !room) return;
         if (room.roomType !== RoomTypes.RADIO) return;

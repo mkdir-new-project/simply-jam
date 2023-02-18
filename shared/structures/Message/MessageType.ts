@@ -18,7 +18,9 @@ enum MessageTypes {
     RADIO_JOIN_ROOM,
     RADIO_LEAVE_ROOM,
     RADIO_BROADCAST_FINISH,
-    RADIO_BROADCAST_START
+    RADIO_BROADCAST_START,
+    SUCCESS,
+    ERROR
 }
 
 export default MessageTypes;
