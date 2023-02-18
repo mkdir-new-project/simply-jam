@@ -9,7 +9,7 @@ class Room implements BaseRoom {
     currentTrack: Music|null;
     roomId: string;
     trackQueue: string[];
-    roomType: RoomTypes;
+    roomType: RoomTypes.PARTY;
 
     constructor() {
         this.users = new Map();

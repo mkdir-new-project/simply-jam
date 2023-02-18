@@ -1,15 +1,11 @@
 import WsEvent from "../../structures/Events/WsEvent";
-import Message from "../../../../shared/structures/Message";
+import Message, { DataTypes } from "../../../../shared/structures/Message";
 import WsServer from "../../structures/WsServer";
-import Logger from "../../../../shared/structures/Logger";
 import RoomTypes from "../../structures/Rooms/RoomTypes";
-import RadioRoom from "../../structures/Rooms/RadioRoom";
-import { Console } from "console";
 
-export default new WsEvent({
+export default new WsEvent<DataTypes.Client.RADIO_JOIN_ROOM>({
     messageType: Message.types.RADIO_JOIN_ROOM,
     async callback(this: WsServer, connection, _message){
-        console.log('aaa')
 
         const user = this.users.get(connection.id);
 
@@ -17,14 +13,15 @@ export default new WsEvent({
 
         if (user.roomId != null || !room) return;
         if (room.roomType !== RoomTypes.RADIO) return;
-
+        
         user.roomId = room.roomId;
         room.users.set(user.userId, user);
 
 
         connection.send(
-            new Message({
-                type: Message.types.RADIO_JOIN_ROOM
+            new Message<DataTypes.Server.RADIO_JOIN_ROOM>({
+                type: Message.types.RADIO_JOIN_ROOM,
+                data: [room.serialize()]
             }).encode()
         )
         // (room as RadioRoom).getCurrentTrack(user);

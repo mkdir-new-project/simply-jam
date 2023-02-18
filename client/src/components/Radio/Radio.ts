@@ -62,7 +62,7 @@ class Radio extends EventTarget {
     }
 
     start(isInitialStart = true) {
-        this.frame?.stop();
+        // this.frame?.stop();
         
         if (!isInitialStart) this.progress.value = 1000;
         
@@ -98,6 +98,7 @@ class Radio extends EventTarget {
 
             if (!isCustomEvent(ev)) return;
 
+            this.frame?.stop();
             if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted loading before resolving');
             if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing cannot load');
 

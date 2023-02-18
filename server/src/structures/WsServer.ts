@@ -81,6 +81,12 @@ class WsServer extends server {
         // user disconnected, remove from users map followok
 
         this.on('close', (connection, _number, _description) => {
+            const user = this.users.get(connection.id);
+
+            const room = this.rooms.get(user.roomId);
+
+            room.users.delete(connection.id);
+            
             this.users.delete(connection.id);
 
             Logger.log(colors.blue('[WS_SERVER]'), '[WS_CONNECTION_CLOSE]', '-> user left');

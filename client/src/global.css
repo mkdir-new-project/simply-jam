@@ -62,6 +62,13 @@
     align-items: center;
 }
 
+.userCount {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    color: white;
+}
+
 #canvas {
     position: fixed;
     left: 0;

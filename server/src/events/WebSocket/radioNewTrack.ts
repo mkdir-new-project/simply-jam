@@ -1,13 +1,11 @@
 import WsEvent from "../../structures/Events/WsEvent";
 import Message, { DataTypes, MessageTypes } from "../../../../shared/structures/Message";
-import Music from "../../structures/Music/Music";
-import ytdl from "ytdl-core";
 import RadioRoom from "../../structures/Rooms/RadioRoom";
 import RoomTypes from "../../structures/Rooms/RoomTypes";
 
-export default new WsEvent({
+export default new WsEvent<DataTypes.Client.RADIO_NEW_TRACK>({
     messageType: Message.types.RADIO_NEW_TRACK,
-    async callback(connection, _message: Message<DataTypes.Client.NEW_TRACK>) {
+    async callback(connection, _message) {
 
 
         const user = this.users.get(connection.id);

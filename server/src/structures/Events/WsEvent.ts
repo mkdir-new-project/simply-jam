@@ -10,13 +10,13 @@ interface Arguments {
     callback: (this: WsServer, ws: connection, message: Message<any>) => Promise<any>;
 }
 
-class WsEvent extends Events {
+class WsEvent<dataType extends Array<any> = any[]> extends Events {
     
     eventType: EventTypes.WEBSOCKET;
     messageType: MessageTypes;
-    callback: Arguments['callback'];
+    callback: (this: WsServer, ws: connection, message: Message<dataType>) => Promise<any>;
 
-    constructor({ messageType, callback }: Arguments) {
+    constructor({ messageType, callback }: { messageType: MessageTypes, callback: (this: WsServer, ws: connection, message: Message<dataType>) => Promise<any> }) {
         super();
         this.eventType = EventTypes.WEBSOCKET;
         this.messageType = messageType;

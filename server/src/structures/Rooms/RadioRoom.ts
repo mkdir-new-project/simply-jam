@@ -36,13 +36,17 @@ class RadioRoom implements BaseRoom {
 
     }
 
+    serialize() {
+        return { roomId: this.roomId, userCount: this.users.size };
+    }
+
     broadcast(message: Message|Buffer) {
         const msg = message instanceof Buffer ? message : message.encode();
         const users = [...this.users.values()];
 
         for (let i = 0; i < users.length; i++) {
             const user = users[i];
-            user.connection.send(message);
+            user.connection.send(msg);
         };
     }
 
