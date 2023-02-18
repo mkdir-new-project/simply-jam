@@ -9,9 +9,6 @@ import Visualizer from "../Visualizer/Visualizer";
 
 class Radio extends EventTarget {
     audio: HTMLAudioElement;
-    private _audioResolving: boolean;
-    private _socket: WsManager;
-    private _lastTrackTime: number;
     frame: AnimationFrame | null;
     _playing: boolean;
     canvas: HTMLCanvasElement;
@@ -20,11 +17,13 @@ class Radio extends EventTarget {
     title: HTMLDivElement;
     visualizer: Visualizer | null;
 
+    private _audioResolving: boolean;
+    private _socket: WsManager;
+    private _lastTrackTime: number;
+
     constructor(wsm: WsManager, canvas: HTMLCanvasElement, progress: HTMLProgressElement, title: HTMLDivElement) {
         super();
-        this._socket = wsm;
-        this._audioResolving = false;
-        this._playing = false;
+
         this.progress = progress;
         this.audio = new Audio();
         this.canvas = canvas;
@@ -34,13 +33,18 @@ class Radio extends EventTarget {
         this.title = title;
         this.visualizer = null;
 
+        this._socket = wsm;
+        this._audioResolving = false;
+        this._playing = false;
+
         this.audio.onerror = Logger.error;
     }
 
     connectToStream() {
         this._socket.send(
-            new Message({
-                type: Message.types.RADIO_JOIN_ROOM
+            new Message<DataTypes.Client.RADIO_JOIN_ROOM>({
+                type: Message.types.RADIO_JOIN_ROOM,
+                data: [{ roomId: 'radio_1234 ' }]
             })
         )
     }
@@ -63,9 +67,9 @@ class Radio extends EventTarget {
 
     start(isInitialStart = true) {
         // this.frame?.stop();
-        
+
         if (!isInitialStart) this.progress.value = 1000;
-        
+
         if (this._audioResolving) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio resolving');;
 
         if (this._playing) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio already playing');
