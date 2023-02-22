@@ -2,7 +2,7 @@ import { emit } from "process";
 import Logger from "../../../../shared/structures/Logger";
 import Message, { DataTypes } from "../../../../shared/structures/Message";
 import WsManager from "../../structures/WsManager";
-import { isCustomEvent } from "../../utils";
+import { isCustomEvent, wait } from "../../utils";
 import AnimationFrame from "../AnimationFrame/AnimationFrame";
 import Visualizer from "../Visualizer/Visualizer";
 
@@ -65,11 +65,7 @@ class Radio extends EventTarget {
 
     }
 
-    start(isInitialStart = true) {
-        // this.frame?.stop();
-
-        if (!isInitialStart) this.progress.value = 1000;
-
+    start() {
         if (this._audioResolving) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio resolving');;
 
         if (this._playing) return Logger.logc('red', 'RADIO_ERROR', 'cannot audio already playing');
@@ -102,7 +98,7 @@ class Radio extends EventTarget {
 
             if (!isCustomEvent(ev)) return;
 
-            this.frame?.stop();
+            // this.frame?.stop();
             if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted loading before resolving');
             if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing cannot load');
 
@@ -113,7 +109,9 @@ class Radio extends EventTarget {
 
             this._lastTrackTime = Date.now();
             this.title.innerText = data[0].title;
+            this.progress.value = 0;
             this._audioResolving = await this._loadAudio();
+
         });
 
         this._socket.addEventListener(Message.types[Message.types.RADIO_JOIN_ROOM], async (ev: Event) => {
@@ -130,14 +128,20 @@ class Radio extends EventTarget {
         });
 
 
-        this._socket.addEventListener(Message.types[Message.types.RADIO_GET_TRACK_SEEK], (ev: any) => {
+        this._socket.addEventListener(Message.types[Message.types.RADIO_GET_TRACK_SEEK], async (ev: any) => {
 
             if (!isCustomEvent(ev)) return;
             if (this._audioResolving) return Logger.logc('red', 'AUDIO_LOADER_ERROR', 'Attempted seek before loadeddata');
             if (this._playing) return Logger.logc('red', 'AUDIO_PLAYBACK', 'audio already playing');
             const ping = this._socket.getPing();
             const data: DataTypes.Server.RADIO_GET_TRACK_SEEK = ev.detail;
-            const seek = data[0].seek;
+            let seek = data[0].seek;
+
+            if (data[0].delay != null) {
+                Logger.log('waiting for ' + data[0].delay + ' ms');
+                await wait(Math.max(data[0].delay - (ping * 1000), 0));
+                seek = 0;
+            }
 
             Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
             Logger.logc('purple', 'AUDIO_SEEK', seek + ping, 'audio seek corrected');
@@ -150,23 +154,30 @@ class Radio extends EventTarget {
 
     }
 
+    private _safeQuit(color = 'green', detail: string = 'RADIO_SAFE_QUIT', message: string) {
+        Logger.logc(color, detail, message)
+        this.frame?.stop();
+        this.visualizer?.disconnect();
+        this.flushAudioElement();
+        return;
+    }
+
     private _createAudioElement() {
         this.audio = new Audio();
         this.audio.crossOrigin = 'anonymous';
 
         this.audio.addEventListener('timeupdate', () => {
             const percent = Math.floor((this.audio.currentTime / this.audio.duration) * 1000);
-            this.progress.value = percent === Infinity ? 0 : percent;
+            this.progress.value = isNaN(percent) || percent === Infinity ? 0 : percent;
         })
 
         this.audio.addEventListener('ended', (ev: Event) => {
-            console.log('ended');
-            this.visualizer?.disconnect();
+            // this.visualizer?.disconnect();
             this._playing = false;
 
             Logger.logc('lightblue', 'VISUALIZER', 'playback finished');
 
-            this.start(false)
+            this.start()
 
             // this.frame?.stop();
         })
@@ -175,7 +186,7 @@ class Radio extends EventTarget {
     private _loadAudio(): Promise<boolean> {
         const _this = this;
         this._audioResolving = true;
-        if (this.frame) this.frame.stop();
+        // if (this.frame) this.frame.stop();
 
 
         return new Promise((resolve, reject) => {
@@ -187,9 +198,12 @@ class Radio extends EventTarget {
             visualizer.connect();
 
 
-            this.frame = new AnimationFrame(60, visualizer.render.bind(visualizer, this.start.bind(_this) as any, _this));
 
             this.audio.addEventListener('loadeddata', () => {
+
+                this.frame?.stop();
+
+                this.frame = new AnimationFrame(60, visualizer.render.bind(visualizer, this.start.bind(_this) as any, _this));
 
                 Logger.logc('lightgreen', 'AUDIO_LOADER', 'resolved audio');
 

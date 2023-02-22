@@ -10,7 +10,11 @@ export default new WsEvent<DataTypes.Client.RADIO_JOIN_ROOM>({
         const user = this.users.get(connection.id);
         const roomId = _message.data[0].roomId;
 
-        const room = this.rooms.get(roomId);
+        console.log('Trying to join room id', roomId)
+
+        const room = this.rooms.get('radio_1234');
+
+        console.log(room, this.rooms);
 
         if (user.roomId != null || !room) return;
         if (room.roomType !== RoomTypes.RADIO) return;

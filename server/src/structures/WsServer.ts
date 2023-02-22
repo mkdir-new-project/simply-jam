@@ -49,6 +49,10 @@ class WsServer extends server {
 
     }
 
+    private _sendErrorMessage() {
+        
+    }
+
     broadcastRoom(roomId: string, message: Message | Buffer) {
         const room = this.rooms.get(roomId);
 

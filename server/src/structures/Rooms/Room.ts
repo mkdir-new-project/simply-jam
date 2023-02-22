@@ -18,6 +18,8 @@ class Room implements BaseRoom {
         this.trackQueue = [];
         this.roomType = RoomTypes.PARTY;
     }
+
+    serialize: (...args: any[]) => any;
 };
 
 export default Room;

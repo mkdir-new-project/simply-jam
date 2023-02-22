@@ -31,21 +31,23 @@ httpserver.start();
 (async function () {
     const server = new WsServer(httpserver.server);
 
-    const radioRoom = new RadioRoom();
+    const radioRoom = new RadioRoom(3000);
     let elapsed = 0;
     radioRoom.roomId = 'radio_1234';
-    const tracks = ['8EGliGWfuNI']//, 'AXbbTtf-miY', 'umqA5IMx_2I']//, ];
+    const tracks = ['8EGliGWfuNI', 'AXbbTtf-miY', 'umqA5IMx_2I']//, ];
 
     for (let i = 0; i < tracks.length; i++) {
         const x = tracks[i];
         const url = `https://youtube.com/watch?v=${x}`;
         const data = await ytdl.getInfo(url);
         const music = new Music(url, data.videoDetails);
+        const duration = (parseInt(music.details.lengthSeconds) * 1000);
         music.startTime += elapsed;
-        elapsed += (parseInt(music.details.lengthSeconds) * 1000);
+
+        elapsed += (duration + radioRoom.trackStartDelay);
         radioRoom.trackQueue.push(music);
 
-        console.log(new Date(music.startTime).toLocaleString())
+        console.log(new Date(music.startTime).toLocaleString(), duration, radioRoom.trackStartDelay)
     }
 
     server.rooms.set(radioRoom.roomId, radioRoom)

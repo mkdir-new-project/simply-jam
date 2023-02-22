@@ -22,8 +22,9 @@ class RadioRoom implements BaseRoom {
     timer: boolean;
     roomType: RoomTypes.RADIO;
     bufferPadding: number;
+    trackStartDelay: number;
 
-    constructor() {
+    constructor(trackStartDelay: number = 2000) {
         this.users = new Map();
         this.currentTrack = 0;
         this.roomId = Utils.getId('radio_', 4);
@@ -33,6 +34,7 @@ class RadioRoom implements BaseRoom {
         this.timer = false;
         this.requestQueue = [];
         this.bufferPadding = 3;
+        this.trackStartDelay = trackStartDelay;
 
     }
 
@@ -40,7 +42,7 @@ class RadioRoom implements BaseRoom {
         return { roomId: this.roomId, userCount: this.users.size };
     }
 
-    broadcast(message: Message|Buffer) {
+    broadcast(message: Message | Buffer) {
         const msg = message instanceof Buffer ? message : message.encode();
         const users = [...this.users.values()];
 
@@ -54,11 +56,15 @@ class RadioRoom implements BaseRoom {
 
 
         const t = this.trackQueue[user.index];
+        const diff = t.startTime - Date.now();
+
+        Logger.log('TRACK SEEK', diff);
+        const delay = diff <= 0 ? null : diff; 
 
         user.connection.send(
             new Message({
                 type: Message.types.RADIO_GET_TRACK_SEEK,
-                data: [{ ...t.serialize() }]
+                data: [t.serialize(delay)]
 
             }).encode()
         )
@@ -72,12 +78,12 @@ class RadioRoom implements BaseRoom {
         let index;
         for (let i = this.trackQueue.length - 1; i >= 0; i--) {
             now = Date.now();
-            const t = this.trackQueue[i];
+            let t = this.trackQueue[i];
             const dt = Math.floor(t.startTime / 1000); //new Date(t.startTime);
 
 
             console.log(dt, dn);
-            if (dt > dn) continue;
+            if (dt > dn && i != 0) continue;
 
 
 
@@ -90,16 +96,16 @@ class RadioRoom implements BaseRoom {
             index = i;
             Logger.log(t.details.title, seek, duration, diff, index)
 
-            
+
             /**
              * if seek is less than song duration and there's only 3 seconds left to finish 
              * then send the next song 
              * because the song will end by the time it reaches the end user
              */
-            if (diff >= 0 && diff < this.bufferPadding)  {
+            if (diff >= 0 && diff <= this.bufferPadding) {
                 // await wait((diff + 10) * 1000);
-                Logger.log('waiting ' + diff * 1000 + ' ms');
-                await wait(diff * 1000);
+                // Logger.log('waiting ' + diff * 1000 + ' ms');
+                // await wait(diff * 1000);
                 index++;
             }
 
@@ -110,7 +116,7 @@ class RadioRoom implements BaseRoom {
              * seek is negative
              */
             if (diff < 0 || index > this.trackQueue.length - 1) {
-            
+
                 user.connection.send(
                     new Message({
                         type: Message.types.RADIO_BROADCAST_FINISH
@@ -121,10 +127,14 @@ class RadioRoom implements BaseRoom {
 
             user.index = index;
 
+            t = this.trackQueue[index];
+
+            let delay = null; //Date.now() <= t.startTime ? t.startTime + diff : null;
+
             user.connection.send(
                 new Message({
                     type: Message.types.RADIO_NEW_TRACK,
-                    data: [{ ...this.trackQueue[index].serialize() }]
+                    data: [this.trackQueue[index].serialize(delay)]
 
                 }).encode()
             )

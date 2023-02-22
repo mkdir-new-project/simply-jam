@@ -6,7 +6,7 @@ abstract class BaseRoom {
     abstract users: Map<string, User>
     abstract roomType: RoomTypes.PARTY|RoomTypes.RADIO;
 
-    // abstract getUsers: () => void;
+    abstract serialize: (...args: any[]) => any;
 }
 
 export default BaseRoom;

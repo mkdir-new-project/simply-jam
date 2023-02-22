@@ -13,9 +13,9 @@ class Music {
     }
 
 
-    serialize() {
+    serialize(delay: number | null = null) {
         const millis = Date.now() - this.startTime;
-        return { trackId: this.details.videoId, seek: Math.floor(millis / 1000), title: this.details.title };
+        return { trackId: this.details.videoId, seek: Math.floor(millis / 1000), title: this.details.title, delay: delay };
     }
 }
 
