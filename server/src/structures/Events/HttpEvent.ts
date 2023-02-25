@@ -2,13 +2,15 @@ import Events from "./Events";
 import EventTypes from "./EventTypes";
 import HttpServer from "../HttpServer";
 import type { RequestListener, IncomingMessage, ServerResponse } from 'http';
+import type { RequestHandler } from 'express';
 import { HttpTypes } from "../../../../shared/structures/HTTP";
 
 
 interface Arguments {
     route: string;
     method?: HttpTypes;
-    callback: (this: HttpServer, ...args: Parameters<RequestListener<typeof IncomingMessage, typeof ServerResponse>>) => Promise<any>;
+    callback: (this: HttpServer, ...args: Parameters<RequestHandler>) => ReturnType<RequestHandler>;
+    // callback: (this: HttpServer, ...args: Parameters<RequestListener<typeof IncomingMessage, typeof ServerResponse>>) => Promise<any>;
 }
 
 class HttpEvent extends Events {

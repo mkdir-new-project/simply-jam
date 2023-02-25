@@ -74,12 +74,12 @@ class RadioRoom implements BaseRoom {
 
     async getCurrentTrack(user: User) {
         let now = Date.now();
-        const dn = Math.floor(now / 1000); //new Date(now);
+        const dn = now// Math.floor(now / 1000); //new Date(now);
         let index;
         for (let i = this.trackQueue.length - 1; i >= 0; i--) {
             now = Date.now();
             let t = this.trackQueue[i];
-            const dt = Math.floor(t.startTime / 1000); //new Date(t.startTime);
+            const dt = t.startTime //Math.floor(t.startTime / 1000); //new Date(t.startTime);
 
 
             console.log(dt, dn);

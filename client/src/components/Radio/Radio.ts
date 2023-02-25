@@ -144,7 +144,7 @@ class Radio extends EventTarget {
             }
 
             Logger.logc('purple', 'WS_LATENCY', ping * 1000 + ' ms');
-            Logger.logc('purple', 'AUDIO_SEEK', seek + ping, 'audio seek corrected');
+            Logger.logc('purple', 'AUDIO_SEEK', seek + ping, 'audio seek corrected', this.audio.duration);
 
             this.audio.currentTime = Math.max(seek + ping, 0);
 

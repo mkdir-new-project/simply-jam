@@ -6,6 +6,7 @@ import HttpServer from "./structures/HttpServer";
 import RadioRoom from "./structures/Rooms/RadioRoom";
 import Music from "./structures/Music/Music";
 import ytdl from "ytdl-core";
+import express from 'express';
 
 declare module 'websocket' {
     interface connection {
@@ -22,19 +23,20 @@ Logger.DEV = true;
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 const httpserver = new HttpServer(PORT);
 
-httpserver.init();
-httpserver.start();
+
 
 // ws server, custom build i'll show how that works now
 
 
 (async function () {
+    await httpserver.init();
+    httpserver.start();
     const server = new WsServer(httpserver.server);
 
     const radioRoom = new RadioRoom(3000);
     let elapsed = 0;
     radioRoom.roomId = 'radio_1234';
-    const tracks = ['8EGliGWfuNI', 'AXbbTtf-miY', 'umqA5IMx_2I']//, ];
+    const tracks = ['4gzIL8_G4Xs', 'AXbbTtf-miY', 'umqA5IMx_2I']//, ];
 
     for (let i = 0; i < tracks.length; i++) {
         const x = tracks[i];
@@ -51,7 +53,7 @@ httpserver.start();
     }
 
     server.rooms.set(radioRoom.roomId, radioRoom)
-    
+
     server.init();
     server.start();
 
